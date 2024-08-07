@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:startDestination="@id/loginFragment">
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.example.iabmob.LoginFragment"
+        android:label="Login">
+        <action
+            android:id="@+id/action_loginFragment_to_mapFragment"
+            app:destination="@id/mapFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_registerFragment"
+            app:destination="@id/registerFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.example.iabmob.RegisterFragment"
+        android:label="Register">
+        <action
+            android:id="@+id/action_registerFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/mapFragment"
+        android:name="com.example.iabmob.MapFragment"
+        android:label="Mapa">
+        <action
+            android:id="@+id/action_mapFragment_to_resultsFragment"
+            app:destination="@id/resultsFragment">
+            <argument
+                android:name="startLocation"
+                app:argType="string" />
+            <argument
+                android:name="destination"
+                app:argType="string" />
+            <argument
+                android:name="startLat"
+                app:argType="string" />
+            <argument
+                android:name="startLng"
+                app:argType="string" />
+            <argument
+                android:name="endLat"
+                app:argType="string" />
+            <argument
+                android:name="endLng"
+                app:argType="string" />
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/resultsFragment"
+        android:name="com.example.iabmob.ResultsFragment"
+        android:label="Resultados">
+        <argument
+            android:name="startLocation"
+            app:argType="string" />
+        <argument
+            android:name="destination"
+            app:argType="string" />
+        <argument
+            android:name="startLat"
+            app:argType="string" />
+        <argument
+            android:name="startLng"
+            app:argType="string" />
+        <argument
+            android:name="endLat"
+            app:argType="string" />
+        <argument
+            android:name="endLng"
+            app:argType="string" />
+    </fragment>
+</navigation>

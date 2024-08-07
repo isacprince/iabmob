@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">IAB Mob</string>
+    <string name="register">Rotas</string>
+    <string name="incidents">Resultados</string>
+    <string name="start_location">Local de Partida: %1$s</string>
+    <string name="destination">Destino: %1$s</string>
+    <string name="estimated_time">Tempo estimado: &lt;b&gt;%1$s&lt;/b&gt;</string>
+    <string name="best_option">Melhor opção: &lt;b&gt;%1$s&lt;/b&gt;</string>
+</resources>
