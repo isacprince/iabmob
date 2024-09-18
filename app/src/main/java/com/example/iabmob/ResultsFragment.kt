@@ -25,6 +25,9 @@ class ResultsFragment : Fragment(), OnMapReadyCallback {
     private lateinit var binding: FragmentResultsBinding
     private val args: ResultsFragmentArgs by navArgs()
     private lateinit var map: GoogleMap
+    private var fastestRouteDuration = Int.MAX_VALUE
+    private var fastestMode: String? = null
+    private var fastestPoints: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,27 +48,40 @@ class ResultsFragment : Fragment(), OnMapReadyCallback {
 
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
+        // Configura o botão para exibir a rota mais rápida
+        binding.btnShowFastestRoute.setOnClickListener {
+            fastestPoints?.let {
+                drawRouteOnMap(it, args.startLat.toDouble(), args.startLng.toDouble(), args.endLat.toDouble(), args.endLng.toDouble())
+            } ?: Toast.makeText(requireContext(), "Nenhuma rota salva", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
         map.uiSettings.isZoomControlsEnabled = true
 
-        getTravelTimeAndDrawRoute(args.startLat, args.startLng, args.endLat, args.endLng)
+        getRoutes(args.startLat, args.startLng, args.endLat, args.endLng)
     }
 
-    private fun getTravelTimeAndDrawRoute(startLat: String, startLng: String, endLat: String, endLng: String) {
+    private fun getRoutes(startLat: String, startLng: String, endLat: String, endLng: String) {
         val apiKey = "AIzaSyDcsRXFdlMQ6NZlmC127DN5g2c6kEy2XQw"
-        val url = "https://maps.googleapis.com/maps/api/directions/json?" +
-                "origin=$startLat,$startLng&destination=$endLat,$endLng&key=$apiKey"
+        val modes = listOf("driving", "walking", "bicycling", "transit")
 
+        for (mode in modes) {
+            val url = "https://maps.googleapis.com/maps/api/directions/json?origin=$startLat,$startLng&destination=$endLat,$endLng&mode=$mode&key=$apiKey"
+            fetchRoute(url, mode)
+        }
+    }
+
+    private fun fetchRoute(url: String, mode: String) {
         val client = OkHttpClient()
         val request = Request.Builder().url(url).build()
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 requireActivity().runOnUiThread {
-                    Toast.makeText(requireContext(), "Failed to get travel time", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Falha ao obter a rota para $mode", Toast.LENGTH_SHORT).show()
                 }
             }
 
@@ -75,32 +91,32 @@ class ResultsFragment : Fragment(), OnMapReadyCallback {
                     val routes = jsonResponse.getJSONArray("routes")
                     if (routes.length() > 0) {
                         val legs = routes.getJSONObject(0).getJSONArray("legs")
-                        val duration = legs.getJSONObject(0).getJSONObject("duration")
-                        val travelTime = duration.getString("text")
+                        val duration = legs.getJSONObject(0).getJSONObject("duration").getString("value").toInt() // Tempo em segundos
+                        val travelTime = legs.getJSONObject(0).getJSONObject("duration").getString("text")
+                        val points = routes.getJSONObject(0).getJSONObject("overview_polyline").getString("points")
 
-                        val overviewPolyline = routes.getJSONObject(0).getJSONObject("overview_polyline")
-                        val points = overviewPolyline.getString("points")
-
+                        // Armazena os dados da rota mais rápida
                         requireActivity().runOnUiThread {
-                            binding.tvEstimatedTime.text = HtmlCompat.fromHtml(
-                                getString(R.string.estimated_time, travelTime),
-                                HtmlCompat.FROM_HTML_MODE_LEGACY
-                            )
-                            binding.tvBestOption.text = HtmlCompat.fromHtml(
-                                getString(R.string.best_option, "Carro"), // Moque como "Carro"
-                                HtmlCompat.FROM_HTML_MODE_LEGACY
-                            )
-
-                            drawRouteOnMap(points, startLat.toDouble(), startLng.toDouble(), endLat.toDouble(), endLng.toDouble())
-                        }
-                    } else {
-                        requireActivity().runOnUiThread {
-                            Toast.makeText(requireContext(), "No route found", Toast.LENGTH_SHORT).show()
+                            checkAndDisplayFastestRoute(mode, travelTime, duration, points)
                         }
                     }
                 }
             }
         })
+    }
+
+    private fun checkAndDisplayFastestRoute(mode: String, travelTime: String, duration: Int, points: String) {
+        if (duration < fastestRouteDuration) {
+            fastestRouteDuration = duration
+            fastestMode = mode
+            fastestPoints = points // Salva os pontos da rota mais rápida
+        }
+
+        // Exibe a melhor rota após todas as requisições
+        binding.tvBestOption.text = HtmlCompat.fromHtml(
+            getString(R.string.best_option, "$fastestMode: $travelTime"),
+            HtmlCompat.FROM_HTML_MODE_LEGACY
+        )
     }
 
     private fun drawRouteOnMap(points: String, startLat: Double, startLng: Double, endLat: Double, endLng: Double) {
