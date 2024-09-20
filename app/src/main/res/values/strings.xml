@@ -7,4 +7,6 @@
     <string name="estimated_time">Tempo estimado: &lt;b&gt;%1$s&lt;/b&gt;</string>
     <string name="best_option">Melhor opção: &lt;b&gt;%1$s&lt;/b&gt;</string>
     <string name="cheapest_option">Opção mais barata: %s</string>
+    <string name="travel_info">%1$s \n %2$s</string>
+    <string name="sustainable_option">Rota Sustentável: %1$s, Tempo: %2$s</string>
 </resources>

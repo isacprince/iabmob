@@ -107,5 +107,46 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginTop="16dp" />
 
+        <!-- TextView para mostrar informações da viagem -->
+        <TextView
+                android:id="@+id/travel_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/white"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:padding="8dp"
+                android:elevation="8dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginStart="16dp"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- Botão para mostrar a rota mais sustentável -->
+        <Button
+                android:id="@+id/btnShowSustainableRoute"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Mostrar Rota Mais Sustentável"
+                android:backgroundTint="@android:color/holo_green_dark"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="16dp"
+                app:layout_constraintTop_toBottomOf="@id/btnShowCheapestRoute"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Exibir a rota mais sustentável -->
+        <TextView
+                android:id="@+id/tvSustainableOption"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="8dp"
+                app:layout_constraintTop_toBottomOf="@id/tvCheapestOption"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
