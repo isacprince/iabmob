@@ -6,4 +6,5 @@
     <string name="destination">Destino: %1$s</string>
     <string name="estimated_time">Tempo estimado: &lt;b&gt;%1$s&lt;/b&gt;</string>
     <string name="best_option">Melhor opção: &lt;b&gt;%1$s&lt;/b&gt;</string>
+    <string name="cheapest_option">Opção mais barata: %s</string>
 </resources>
