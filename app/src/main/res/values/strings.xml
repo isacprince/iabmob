@@ -9,4 +9,8 @@
     <string name="cheapest_option">Opção mais barata: %s</string>
     <string name="travel_info">%1$s \n %2$s</string>
     <string name="sustainable_option">Rota Sustentável: %1$s, Tempo: %2$s</string>
+    <string name="route_time">Tempo: %s</string>
+    <string name="route_distance">Distância: %s</string>
+    <string name="route_price">Preço: %s</string>
+    <string name="transport_type">Transporte: %s</string>
 </resources>

@@ -27,13 +27,22 @@ class ResultsFragment : Fragment(), OnMapReadyCallback {
     private var fastestRouteDuration = Int.MAX_VALUE
     private var fastestMode: String? = null
     private var fastestPoints: JSONArray? = null
+    private var fastestTime: String = ""
+    private var fastestDistance: String = ""
+    private var fastestPrice: String = ""
 
     private var cheapestRouteCost = Double.MAX_VALUE
     private var cheapestMode: String? = null
     private var cheapestPoints: JSONArray? = null
+    private var cheapestTime: String = ""
+    private var cheapestDistance: String = ""
+    private var cheapestPrice: String = ""
 
     private var sustainablePoints: JSONArray? = null
     private var sustainableMode: String? = null
+    private var sustainableTime: String = ""
+    private var sustainableDistance: String = ""
+    private var sustainablePrice: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,34 +55,68 @@ class ResultsFragment : Fragment(), OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val startLocation = args.startLocation
-        val destination = args.destination
-
-        binding.tvStartLocation.text = getString(R.string.start_location, startLocation)
-        binding.tvDestination.text = getString(R.string.destination, destination)
-
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        // Configura o botão para exibir a rota mais rápida
+// No onViewCreated(), atualize o texto quando clicar nos botões:
+
+// Configura o botão para exibir a rota mais rápida
         binding.btnShowFastestRoute.setOnClickListener {
             fastestPoints?.let {
+                // Mostrar o mapa com a rota mais rápida
                 drawRouteOnMap(it, args.startLat.toDouble(), args.startLng.toDouble(), args.endLat.toDouble(), args.endLng.toDouble())
-            } ?: Toast.makeText(requireContext(), "Nenhuma rota salva", Toast.LENGTH_SHORT).show()
+
+                // Exibir as informações da rota mais rápida
+                binding.routeInfoContainer.visibility = View.VISIBLE
+                binding.tvRouteOptionName.text = "Rota Mais Rápida" // Nome da opção
+                binding.tvRouteTime.text = getString(R.string.route_time, fastestTime)
+                binding.tvRouteDistance.text = getString(R.string.route_distance, fastestDistance)
+                binding.tvRoutePrice.text = getString(R.string.route_price, fastestPrice)
+                binding.tvTransportType.text = getString(R.string.transport_type, fastestMode)
+            } ?: Toast.makeText(requireContext(), "Nenhuma rota rápida salva", Toast.LENGTH_SHORT).show()
         }
 
-        // Configura o botão para exibir a rota mais barata
+// Configura o botão para exibir a rota mais barata
         binding.btnShowCheapestRoute.setOnClickListener {
             cheapestPoints?.let {
+                // Mostrar o mapa com a rota mais barata
                 drawRouteOnMap(it, args.startLat.toDouble(), args.startLng.toDouble(), args.endLat.toDouble(), args.endLng.toDouble())
-            } ?: Toast.makeText(requireContext(), "Nenhuma rota salva", Toast.LENGTH_SHORT).show()
+
+                // Exibir as informações da rota mais barata
+                binding.routeInfoContainer.visibility = View.VISIBLE
+                binding.tvRouteOptionName.text = "Rota Mais Barata" // Nome da opção
+                binding.tvRouteTime.text = getString(R.string.route_time, cheapestTime)
+                binding.tvRouteDistance.text = getString(R.string.route_distance, cheapestDistance)
+                binding.tvRoutePrice.text = getString(R.string.route_price, cheapestPrice)
+                binding.tvTransportType.text = getString(R.string.transport_type, cheapestMode)
+            } ?: Toast.makeText(requireContext(), "Nenhuma rota barata salva", Toast.LENGTH_SHORT).show()
         }
 
-        // Configura o botão para exibir a rota mais sustentável
+// Configura o botão para exibir a rota mais sustentável
         binding.btnShowSustainableRoute.setOnClickListener {
             sustainablePoints?.let {
+                // Mostrar o mapa com a rota mais sustentável
                 drawRouteOnMap(it, args.startLat.toDouble(), args.startLng.toDouble(), args.endLat.toDouble(), args.endLng.toDouble())
-            } ?: Toast.makeText(requireContext(), "Nenhuma rota sustentável encontrada", Toast.LENGTH_SHORT).show()
+
+                // Exibir as informações da rota mais sustentável
+                binding.routeInfoContainer.visibility = View.VISIBLE
+                binding.tvRouteOptionName.text = "Rota Mais Sustentável" // Nome da opção
+                binding.tvRouteTime.text = getString(R.string.route_time, sustainableTime)
+                binding.tvRouteDistance.text = getString(R.string.route_distance, sustainableDistance)
+                binding.tvRoutePrice.text = getString(R.string.route_price, sustainablePrice)
+                binding.tvTransportType.text = getString(R.string.transport_type, sustainableMode)
+            } ?: Toast.makeText(requireContext(), "Nenhuma rota sustentável salva", Toast.LENGTH_SHORT).show()
+        }
+
+    }
+
+    private fun translateTransportMode(mode: String): String {
+        return when (mode) {
+            "driving" -> "carro"
+            "transit" -> "público"
+            "walking" -> "caminhada"
+            "bicycling" -> "bicicleta"
+            else -> "desconhecido"
         }
     }
 
@@ -113,14 +156,15 @@ class ResultsFragment : Fragment(), OnMapReadyCallback {
                         val legs = routes.getJSONObject(0).getJSONArray("legs")
                         val duration = legs.getJSONObject(0).getJSONObject("duration").getString("value").toInt()
                         val travelTime = legs.getJSONObject(0).getJSONObject("duration").getString("text")
+                        val distance = legs.getJSONObject(0).getJSONObject("distance").getString("text")
                         val cost = calculateCost(mode, legs)
 
                         requireActivity().runOnUiThread {
                             if (mode == "driving" || mode == "transit") {
-                                checkAndDisplayFastestRoute(mode, travelTime, duration, legs)
-                                checkAndDisplayCheapestRoute(mode, cost, legs)
+                                checkAndDisplayFastestRoute(mode, travelTime, distance, duration, cost, legs)
+                                checkAndDisplayCheapestRoute(mode, cost, travelTime, distance, legs)
                             } else {
-                                checkAndDisplaySustainableRoute(mode, duration, legs)
+                                checkAndDisplaySustainableRoute(mode, duration, travelTime, distance, legs)
                             }
                         }
                     }
@@ -154,49 +198,45 @@ class ResultsFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    private fun checkAndDisplayFastestRoute(mode: String, travelTime: String, duration: Int, legs: JSONArray) {
+    private fun checkAndDisplayFastestRoute(mode: String, travelTime: String, distance: String, duration: Int, cost: Double, legs: JSONArray) {
         if (duration < fastestRouteDuration) {
             fastestRouteDuration = duration
             fastestMode = mode
             fastestPoints = legs
+            fastestTime = travelTime
+            fastestDistance = distance
+            fastestPrice = String.format("%.2f", cost) + " R$"
         }
-
-        binding.tvBestOption.text = HtmlCompat.fromHtml(
-            getString(R.string.best_option, "$fastestMode: $travelTime"),
-            HtmlCompat.FROM_HTML_MODE_LEGACY
-        )
     }
 
-    private fun checkAndDisplayCheapestRoute(mode: String, cost: Double, legs: JSONArray) {
+    private fun checkAndDisplayCheapestRoute(mode: String, cost: Double, travelTime: String, distance: String, legs: JSONArray) {
         if (cost < cheapestRouteCost) {
             cheapestRouteCost = cost
-            cheapestMode = mode
+            cheapestMode = translateTransportMode(mode)
             cheapestPoints = legs
+            cheapestTime = travelTime
+            cheapestDistance = distance
+            cheapestPrice = String.format("%.2f", cost) + " R$"
         }
-
-        binding.tvCheapestOption.text = HtmlCompat.fromHtml(
-            getString(R.string.cheapest_option, "$cheapestMode: R$%.2f".format(cheapestRouteCost)),
-            HtmlCompat.FROM_HTML_MODE_LEGACY
-        )
     }
 
-    private fun checkAndDisplaySustainableRoute(mode: String, duration: Int, legs: JSONArray) {
-        // Prioridade: walking < bicycle < transit, se walking/bicycle > 1hr
+    private fun checkAndDisplaySustainableRoute(mode: String, duration: Int, travelTime: String, distance: String, legs: JSONArray) {
         if (mode == "walking" && duration <= 3600) {
-            sustainableMode = mode
+            sustainableMode = translateTransportMode(mode)
             sustainablePoints = legs
+            sustainableTime = travelTime
+            sustainableDistance = distance
         } else if (mode == "bicycling" && duration <= 3600 && sustainableMode != "walking") {
-            sustainableMode = mode
+            sustainableMode = translateTransportMode(mode)
             sustainablePoints = legs
+            sustainableTime = travelTime
+            sustainableDistance = distance
         } else if (mode == "transit" && sustainableMode == null) {
-            sustainableMode = mode
+            sustainableMode = translateTransportMode(mode)
             sustainablePoints = legs
+            sustainableTime = travelTime
+            sustainableDistance = distance
         }
-
-        binding.tvSustainableOption.text = HtmlCompat.fromHtml(
-            getString(R.string.sustainable_option, sustainableMode, legs.getJSONObject(0).getJSONObject("duration").getString("text")),
-            HtmlCompat.FROM_HTML_MODE_LEGACY
-        )
     }
 
     private fun drawRouteOnMap(legs: JSONArray, startLat: Double, startLng: Double, endLat: Double, endLng: Double) {
@@ -273,5 +313,4 @@ class ResultsFragment : Fragment(), OnMapReadyCallback {
         val random = java.util.Random()
         return android.graphics.Color.argb(255, random.nextInt(256), random.nextInt(256), random.nextInt(256))
     }
-
 }
