@@ -1,69 +1,125 @@
-<?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+        xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#303030"
-        android:padding="16dp">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#303030"
+            android:padding="16dp">
 
-        <TextView
-            android:id="@+id/tvStartLocation"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="@android:color/white"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+        <!-- Botões com ícones lado a lado, ajustados para serem quadrados e espaçados -->
+        <LinearLayout
+                android:id="@+id/buttonLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_gravity="center_horizontal">
 
-        <TextView
-            android:id="@+id/tvDestination"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="@android:color/white"
-            android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@id/tvStartLocation"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            <!-- Botão para mostrar a rota mais rápida (Relógio) -->
+            <ImageButton
+                    android:id="@+id/btnShowFastestRoute"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_margin="8dp"
+                    android:src="@drawable/ic_baseline_access_time_24"
+                    android:backgroundTint="@android:color/holo_blue_light"
+                    android:background="@drawable/rounded_button_background" />
 
-        <TextView
-            android:id="@+id/tvEstimatedTime"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="@android:color/white"
-            android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@id/tvDestination"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            <!-- Botão para mostrar a rota mais barata (Cifrão) -->
+            <ImageButton
+                    android:id="@+id/btnShowCheapestRoute"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_margin="8dp"
+                    android:src="@drawable/ic_baseline_attach_money_24"
+                    android:backgroundTint="@android:color/holo_green_light"
+                    android:background="@drawable/rounded_button_background" />
 
-        <TextView
-            android:id="@+id/tvBestOption"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="@android:color/white"
-            android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@id/tvEstimatedTime"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            <!-- Botão para mostrar a rota mais sustentável (Folha) -->
+            <ImageButton
+                    android:id="@+id/btnShowSustainableRoute"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_margin="8dp"
+                    android:src="@drawable/ic_baseline_ecology_24"
+                    android:backgroundTint="@android:color/holo_orange_light"
+                    android:background="@drawable/rounded_button_background" />
+        </LinearLayout>
 
+        <!-- Mapa que exibirá as rotas -->
         <fragment
-            android:id="@+id/map"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:layout_constraintTop_toBottomOf="@id/tvBestOption"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="16dp" />
+                android:id="@+id/map"
+                android:name="com.google.android.gms.maps.SupportMapFragment"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintTop_toBottomOf="@id/buttonLayout"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="16dp" />
 
+        <!-- Exibir as informações (tempo, distância, preço e tipo de transporte) sobre o mapa -->
+        <LinearLayout
+                android:id="@+id/routeInfoContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="8dp"
+                android:padding="8dp"
+                android:background="@android:color/transparent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:visibility="gone">
 
+            <!-- Adicionando o nome da opção -->
+            <TextView
+                    android:id="@+id/tvRouteOptionName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/white"
+                    android:background="@android:color/black"
+                    android:padding="8dp" />
+
+            <TextView
+                    android:id="@+id/tvRouteTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/white"
+                    android:background="@android:color/holo_blue_light"
+                    android:padding="8dp" />
+
+            <TextView
+                    android:id="@+id/tvRouteDistance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/white"
+                    android:background="@android:color/holo_blue_light"
+                    android:padding="8dp" />
+
+            <TextView
+                    android:id="@+id/tvRoutePrice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/white"
+                    android:background="@android:color/holo_green_light"
+                    android:padding="8dp" />
+
+            <TextView
+                    android:id="@+id/tvTransportType"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/white"
+                    android:background="@android:color/holo_orange_light"
+                    android:padding="8dp" />
+        </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
